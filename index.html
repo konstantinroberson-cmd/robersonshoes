@@ -1,3 +1,8 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Roberson | Ателье кожи</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -58,11 +63,13 @@
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 body {
+  margin: 0;
   background: var(--bg);
   color: var(--ink);
   font-family: var(--f-body);
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.4;
   padding-inline: 16px;
   padding-block: 0 96px;
@@ -71,7 +78,7 @@ body.locked { overflow: hidden; }
 button, input, select, textarea { font: inherit; color: inherit; }
 button { cursor: pointer; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.wrap { max-width: 720px; margin-inline: auto; }
+.wrap { max-width: 860px; margin-inline: auto; }
 
 /* шапка */
 .top {
@@ -88,14 +95,15 @@ button { cursor: pointer; }
   border-bottom: 1px solid var(--line);
 }
 .brand { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 12px; }
-.logo { font-family: var(--f-display); font-weight: 600; font-size: 16px; letter-spacing: -0.01em; margin: 0; min-width: 0; }
-.asof { font-family: var(--f-mono); font-size: 11px; color: var(--muted); text-align: right; }
+.logo { font-family: var(--f-display); font-weight: 600; font-size: 20px; letter-spacing: -0.01em; margin: 0; min-width: 0; }
+.asof { font-family: var(--f-mono); font-size: 12px; color: var(--muted); text-align: right; }
 .search {
   width: 100%;
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 10px 12px;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 16px;
 }
 .search::placeholder { color: var(--muted); }
 .seg { display: flex; gap: 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 3px; }
@@ -104,7 +112,8 @@ button { cursor: pointer; }
   border: 0;
   background: transparent;
   border-radius: 7px;
-  padding: 7px 8px;
+  padding: 10px 8px;
+  font-size: 16px;
   font-weight: 500;
   color: var(--muted);
 }
@@ -116,20 +125,19 @@ button { cursor: pointer; }
   border: 1px solid var(--line);
   background: transparent;
   border-radius: 999px;
-  padding: 5px 12px;
-  font-size: 13px;
+  padding: 8px 15px;
+  font-size: 15px;
   color: var(--muted);
 }
 .chip[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); font-weight: 600; }
 
 .bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 14px 10px; }
-.count { font-size: 13px; color: var(--muted); min-width: 0; }
-.sort { background: transparent; border: 0; font-size: 13px; font-weight: 500; color: var(--ink); padding: 4px 0; max-width: 55%; }
+.count { font-size: 14px; color: var(--muted); min-width: 0; }
+.sort { background: transparent; border: 0; font-size: 15px; font-weight: 500; color: var(--ink); padding: 4px 0; max-width: 55%; }
 .sort option { background: var(--surface); color: var(--ink); }
 
 /* сетка товаров */
-.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 14px; }
-@media (min-width: 560px) { .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 14px; }
 .item { display: flex; flex-direction: column; gap: 4px; text-align: left; background: none; border: 0; padding: 0; min-width: 0; }
 .tile {
   position: relative;
@@ -148,19 +156,19 @@ button { cursor: pointer; }
   position: absolute;
   top: 8px;
   left: 8px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
-  padding: 3px 7px;
+  padding: 4px 9px;
   border-radius: 6px;
   background: var(--surface);
   color: var(--ink);
 }
 .badge.sale { color: var(--sale); }
-.brandline { font-size: 12px; color: var(--muted); margin-top: 6px; }
-.name { font-weight: 500; line-height: 1.25; text-wrap: balance; }
+.brandline { font-size: 13px; color: var(--muted); margin-top: 6px; }
+.name { font-size: 17px; font-weight: 500; line-height: 1.25; text-wrap: balance; }
 .price { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
-.price b { font-weight: 500; font-size: 14px; }
-.price s { font-size: 12px; color: var(--muted); }
+.price b { font-weight: 500; font-size: 17px; }
+.price s { font-size: 14px; color: var(--muted); }
 .empty { padding-block: 48px; text-align: center; color: var(--muted); display: flex; flex-direction: column; align-items: center; gap: 14px; }
 
 /* нижняя панель корзины */
@@ -177,16 +185,17 @@ button { cursor: pointer; }
 .cartbar button {
   display: flex;
   width: 100%;
-  max-width: 720px;
+  max-width: 860px;
   margin-inline: auto;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
   border: 0;
   border-radius: 12px;
-  padding: 14px 16px;
+  padding: 16px 18px;
   background: var(--accent);
   color: var(--on-accent);
+  font-size: 17px;
   font-weight: 600;
 }
 .cartbar .sum { font-family: var(--f-mono); font-variant-numeric: tabular-nums; font-weight: 500; }
@@ -197,7 +206,7 @@ button { cursor: pointer; }
 .sheet {
   position: relative;
   width: 100%;
-  max-width: 720px;
+  max-width: 860px;
   max-height: 92%;
   overflow-y: auto;
   background: var(--surface);
@@ -211,19 +220,20 @@ button { cursor: pointer; }
 @keyframes up { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .sheet { animation: none; } .tile { transition: none; } }
 .sheet-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.sheet h2 { margin: 0; font-family: var(--f-display); font-weight: 600; font-size: 17px; text-wrap: balance; }
+.sheet h2 { margin: 0; font-family: var(--f-display); font-weight: 600; font-size: 19px; text-wrap: balance; }
 .x { flex: none; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--line); background: transparent; font-size: 18px; line-height: 1; }
 .big { aspect-ratio: 16 / 9; border-radius: 14px; }
 .big.photo { aspect-ratio: 4 / 5; width: min(100%, 52vh); align-self: center; }
 .tile { overflow: hidden; }
 .tile img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .big .glyph { width: 28%; min-width: 80px; }
-.desc { margin: 0; color: var(--muted); max-width: 65ch; }
-.label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin: 0 0 8px; }
+.desc { margin: 0; font-size: 16px; color: var(--muted); max-width: 65ch; }
+.label { font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin: 0 0 8px; }
 .sizes { display: flex; flex-wrap: wrap; gap: 8px; }
 .size {
-  min-width: 48px;
-  padding: 9px 12px;
+  min-width: 52px;
+  padding: 11px 14px;
+  font-size: 16px;
   border-radius: 9px;
   border: 1px solid var(--line);
   background: transparent;
@@ -236,7 +246,8 @@ button { cursor: pointer; }
 .btn {
   border: 0;
   border-radius: 12px;
-  padding: 13px 18px;
+  padding: 15px 20px;
+  font-size: 16px;
   background: var(--accent);
   color: var(--on-accent);
   font-weight: 600;
@@ -251,16 +262,16 @@ button { cursor: pointer; }
 .lines { display: flex; flex-direction: column; }
 .line { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; padding-block: 12px; border-bottom: 1px solid var(--line); align-items: center; }
 .line .t { font-weight: 500; }
-.line .m { grid-column: 1; font-size: 13px; color: var(--muted); font-family: var(--f-mono); }
+.line .m { grid-column: 1; font-size: 14px; color: var(--muted); font-family: var(--f-mono); }
 .line .lp { grid-column: 2; grid-row: 1; font-family: var(--f-mono); font-variant-numeric: tabular-nums; text-align: right; }
 .step { grid-column: 2; grid-row: 2; display: inline-flex; align-items: center; gap: 4px; justify-self: end; }
 .step button { width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--line); background: transparent; font-size: 16px; line-height: 1; }
 .step span { min-width: 22px; text-align: center; font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
-.total { display: flex; justify-content: space-between; align-items: baseline; font-weight: 600; font-size: 17px; }
+.total { display: flex; justify-content: space-between; align-items: baseline; font-weight: 600; font-size: 19px; }
 .total span:last-child { font-family: var(--f-mono); font-variant-numeric: tabular-nums; font-weight: 500; }
-.note { width: 100%; resize: vertical; min-height: 64px; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+.note { width: 100%; resize: vertical; min-height: 64px; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; font-size: 16px; }
 .note::placeholder { color: var(--muted); }
-.order { margin: 0; padding: 12px; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; font-family: var(--f-mono); font-size: 12px; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; }
+.order { margin: 0; padding: 12px; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; font-family: var(--f-mono); font-size: 13px; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; }
 .actions { display: flex; flex-wrap: wrap; gap: 10px; }
 .clear { align-self: flex-start; background: none; border: 0; padding: 4px 0; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; }
 
@@ -275,10 +286,13 @@ button { cursor: pointer; }
   border-radius: 10px;
   background: var(--ink);
   color: var(--bg);
-  font-size: 14px;
+  font-size: 15px;
   pointer-events: none;
 }
 </style>
+<style>:root{padding-block:env(safe-area-inset-top,0px) env(safe-area-inset-bottom,0px)}</style>
+</head>
+<body>
 
 <div class="wrap">
   <header class="top">
@@ -338,29 +352,29 @@ try {
 /* ===== Настройки магазина ===== */
 const SHOP = {
   name: 'Roberson | Ателье кожи',
-  manager: 'roberson_atelier',          // username менеджера в Telegram без @, например 'shagishov_manager'
+  manager: '',          // username менеджера в Telegram без @, например 'shagishov_manager'
   asOf: '09.10.2026'    // дата, на которую актуальны цены
 };
 
 /* ===== Каталог: меняйте товары здесь ===== */
 const TYPES = {
   sneakers: { label: 'Кроссовки', group: 'shoes' },
-  boots:    { label: 'Кеды',   group: 'shoes' },
-  loafers:  { label: 'Ботинки',    group: 'shoes' },
-  tees:     { label: 'Ремни',  group: 'accessories' },
-  hoodies:  { label: 'Ключницы',      group: 'accessories' },
-  jeans:    { label: 'Брелки',    group: 'accessories' },
-  jackets:  { label: 'Сумки',    group: 'accessories' },
-  dresses:  { label: 'Куртки',    group: 'clothes' }
+  boots:    { label: 'Ботинки',   group: 'shoes' },
+  loafers:  { label: 'Лоферы',    group: 'shoes' },
+  tees:     { label: 'Футболки',  group: 'clothes' },
+  hoodies:  { label: 'Худи',      group: 'clothes' },
+  jeans:    { label: 'Джинсы',    group: 'clothes' },
+  jackets:  { label: 'Куртки',    group: 'clothes' },
+  dresses:  { label: 'Платья',    group: 'clothes' }
 };
-const EU = ['39', '40', '41', '42', '43', '44', '45'];
+const EU = ['38', '39', '40', '41', '42', '43', '44', '45'];
 const EU_F = ['36', '37', '38', '39', '40', '41'];
-const LET = ['S', 'M', 'L', 'XL', 'XXL'];
+const LET = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 const WAIST = ['28', '30', '32', '34', '36'];
 
 const PRODUCTS = [
-  { id: 1,  type: 'sneakers', name: 'Кроссовки «Тропа»',        brand: 'Roberson',  price: 14900,  h: 214, isNew: true, sizes: EU,  sold: ['40', '44'], unit: 'EU', desc: 'Низкие кроссовки на каждый день. Верх из плотной кожи, подошва с хорошей амортизацией.' },
-  { id: 2,  type: 'sneakers', name: 'Кроссовки «Бегун»',        brand: 'Roberson', price: 6490,  old: 8190, h: 152, sizes: EU,  sold: ['38', '45'], unit: 'EU', desc: 'Лёгкая сетка, которая дышит, и мягкая стелька. Подойдут для пробежек и прогулок.' },
+  { id: 1,  type: 'sneakers', name: 'Кроссовки «Тропа»',        brand: 'Ostrov',  price: 7990,  h: 214, isNew: true, sizes: EU,  sold: ['40', '44'], unit: 'EU', desc: 'Низкие кроссовки на каждый день. Верх из плотной кожи, подошва с хорошей амортизацией.' },
+  { id: 2,  type: 'sneakers', name: 'Кроссовки «Бегун»',        brand: 'Nordlin', price: 6490,  old: 8190, h: 152, sizes: EU,  sold: ['38', '45'], unit: 'EU', desc: 'Лёгкая сетка, которая дышит, и мягкая стелька. Подойдут для пробежек и прогулок.' },
   { id: 3,  type: 'boots',    name: 'Ботинки «Чёрный лес»',     brand: 'Kamen',   price: 12900, h: 28,  sizes: ['39', '40', '41', '42', '43', '44', '45', '46'], sold: ['41'], unit: 'EU', desc: 'Кожаные ботинки на шнуровке с рифлёной подошвой. Держат форму и не промокают.' },
   { id: 4,  type: 'boots',    name: 'Челси замшевые',           brand: 'Lovat',   price: 10500, old: 13200, h: 36,  sizes: ['39', '40', '41', '42', '43', '44'], sold: ['39', '43'], unit: 'EU', desc: 'Классические челси из натуральной замши с эластичными вставками по бокам.' },
   { id: 5,  type: 'loafers',  name: 'Лоферы «Пассаж»',          brand: 'Lovat',   price: 9200,  h: 350, sizes: EU_F, sold: [], unit: 'EU', desc: 'Лоферы из гладкой кожи на низком каблуке. Подходят и к джинсам, и к платью.' },
@@ -513,7 +527,7 @@ function openProduct(id) {
     '<div class="brandline" style="margin:0">' + p.brand + ' · ' + TYPES[p.type].label + '</div>' +
     '<p class="desc">' + p.desc + '</p>' +
     '<div><p class="label">' + label + '</p><div class="sizes" id="sizes">' + sizes + '</div></div>' +
-    '<div class="buyrow"><div class="price"><b style="font-size:20px">' + fmt(p.price) + '</b>' + (p.old ? '<s>' + fmt(p.old) + '</s>' : '') + '</div>' +
+    '<div class="buyrow"><div class="price"><b style="font-size:24px">' + fmt(p.price) + '</b>' + (p.old ? '<s>' + fmt(p.old) + '</s>' : '') + '</div>' +
     '<button type="button" class="btn grow" id="add" data-act="add" data-id="' + p.id + '" disabled>Выберите размер</button></div>';
   openSheet();
 }
@@ -665,3 +679,5 @@ renderBar();
 } catch (err) { showError(err && err.stack ? err.stack : String(err)); }
 })();
 </script>
+</body>
+</html>
