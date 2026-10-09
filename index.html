@@ -1,4 +1,3 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>Roberson | Ателье кожи</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -215,6 +214,9 @@ button { cursor: pointer; }
 .sheet h2 { margin: 0; font-family: var(--f-display); font-weight: 600; font-size: 17px; text-wrap: balance; }
 .x { flex: none; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--line); background: transparent; font-size: 18px; line-height: 1; }
 .big { aspect-ratio: 16 / 9; border-radius: 14px; }
+.big.photo { aspect-ratio: 4 / 5; width: min(100%, 52vh); align-self: center; }
+.tile { overflow: hidden; }
+.tile img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .big .glyph { width: 28%; min-width: 80px; }
 .desc { margin: 0; color: var(--muted); max-width: 65ch; }
 .label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin: 0 0 8px; }
@@ -317,7 +319,7 @@ button { cursor: pointer; }
 
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
-<script src="https://telegram.org/js/telegram-web-app.js"></script>  
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script>
 (function () {
 'use strict';
@@ -336,7 +338,7 @@ try {
 /* ===== Настройки магазина ===== */
 const SHOP = {
   name: 'Roberson | Ателье кожи',
-  manager: 'roberson_atelier',          // username менеджера в Telegram без @, например 'shagishov_manager'
+  manager: '',          // username менеджера в Telegram без @, например 'shagishov_manager'
   asOf: '09.10.2026'    // дата, на которую актуальны цены
 };
 
@@ -386,7 +388,9 @@ const GLYPHS = {
   jackets:  '<path d="M22 8h20l14 8-2 34h-9v6H19v-6h-9L8 16z"/><path d="M32 8v48M22 8l10 10 10-10"/>',
   dresses:  '<path d="M26 8h12l2 18 12 30H12l12-30z"/><path d="M24 26h16"/>'
 };
-const glyph = t => '<svg class="glyph" viewBox="0 0 64 64" aria-hidden="true">' + GLYPHS[t] + '</svg>';
+const glyph = t => '<svg class="glyph" viewBox="0 0 64 64" aria-hidden="true">' + (GLYPHS[t] || '') + '</svg>';
+/* Если у товара есть img, показываем фото, иначе цветную плитку с силуэтом */
+const pic = p => p.img ? '<img src="' + p.img + '" alt="' + p.name.replace(/"/g, '') + '" loading="lazy">' : glyph(p.type);
 
 /* ===== Telegram: если страница открыта как Web App ===== */
 /* На своём хостинге добавьте перед этим скриптом:
@@ -446,7 +450,7 @@ function renderGrid() {
   $('grid').innerHTML = list.map(p => {
     const badge = p.old ? '<span class="badge sale">−' + pct(p) + '%</span>' : (p.isNew ? '<span class="badge">Новинка</span>' : '');
     return '<button type="button" class="item" data-id="' + p.id + '">' +
-      '<span class="tile" style="--h:' + p.h + '">' + glyph(p.type) + badge + '</span>' +
+      '<span class="tile" style="--h:' + (p.h || 214) + '">' + pic(p) + badge + '</span>' +
       '<span class="brandline">' + p.brand + ' · ' + TYPES[p.type].label + '</span>' +
       '<span class="name">' + p.name + '</span>' +
       '<span class="price"><b>' + fmt(p.price) + '</b>' + (p.old ? '<s>' + fmt(p.old) + '</s>' : '') + '</span>' +
@@ -505,7 +509,7 @@ function openProduct(id) {
   const label = p.unit === 'EU' ? 'Размер (EU)' : p.unit === 'W' ? 'Обхват талии, W' : 'Размер';
   $('sheet').innerHTML =
     '<div class="sheet-head"><h2 id="sheetTitle">' + p.name + '</h2><button type="button" class="x" data-act="close" aria-label="Закрыть">×</button></div>' +
-    '<div class="tile big" style="--h:' + p.h + '">' + glyph(p.type) + '</div>' +
+    '<div class="tile big' + (p.img ? ' photo' : '') + '" style="--h:' + (p.h || 214) + '">' + pic(p) + '</div>' +
     '<div class="brandline" style="margin:0">' + p.brand + ' · ' + TYPES[p.type].label + '</div>' +
     '<p class="desc">' + p.desc + '</p>' +
     '<div><p class="label">' + label + '</p><div class="sizes" id="sizes">' + sizes + '</div></div>' +
@@ -661,5 +665,3 @@ renderBar();
 } catch (err) { showError(err && err.stack ? err.stack : String(err)); }
 })();
 </script>
-
-</body></html>
