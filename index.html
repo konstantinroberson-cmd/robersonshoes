@@ -222,10 +222,37 @@ button { cursor: pointer; }
 .sheet-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .sheet h2 { margin: 0; font-family: var(--f-display); font-weight: 600; font-size: 19px; text-wrap: balance; }
 .x { flex: none; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--line); background: transparent; font-size: 18px; line-height: 1; }
-.big { aspect-ratio: 16 / 9; border-radius: 14px; }
+.big { aspect-ratio: 16 / 9; border-radius: 14px; flex: none; }
 .big.photo { aspect-ratio: 4 / 5; width: min(100%, 52vh); align-self: center; }
 .tile { overflow: hidden; }
 .tile img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+
+/* галерея: горизонтальная прокрутка со «щёлканьем» по фото */
+.item { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.track {
+  position: absolute; inset: 0;
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+.track::-webkit-scrollbar { display: none; }
+.slide { position: relative; flex: 0 0 100%; height: 100%; scroll-snap-align: center; scroll-snap-stop: always; display: block; }
+.dots { position: absolute; left: 0; right: 0; bottom: 8px; z-index: 2; display: flex; justify-content: center; gap: 5px; pointer-events: none; }
+.dots i { width: 6px; height: 6px; border-radius: 50%; background: #fff; opacity: 0.5; box-shadow: 0 0 0 1px rgba(0,0,0,0.25); }
+.dots i.on { opacity: 1; width: 16px; border-radius: 3px; }
+.badge { z-index: 2; }
+.nav {
+  position: absolute; top: 50%; transform: translateY(-50%); z-index: 2;
+  width: 34px; height: 34px; border-radius: 50%; border: 0; padding: 0;
+  background: var(--surface); color: var(--ink); opacity: 0.92;
+  display: none; place-items: center; font-size: 20px; line-height: 1;
+}
+.nav.prev { left: 8px; }
+.nav.next { right: 8px; }
+.big .nav { display: grid; }
+@media (hover: hover) { .item:hover .nav { display: grid; } }
 .big .glyph { width: 28%; min-width: 80px; }
 .desc { margin: 0; font-size: 16px; color: var(--muted); max-width: 65ch; }
 .label { font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin: 0 0 8px; }
@@ -290,7 +317,6 @@ button { cursor: pointer; }
   pointer-events: none;
 }
 </style>
-<style>:root{padding-block:env(safe-area-inset-top,0px) env(safe-area-inset-bottom,0px)}</style>
 </head>
 <body>
 
@@ -302,9 +328,10 @@ button { cursor: pointer; }
     </div>
     <input class="search" id="q" type="search" placeholder="Поиск: кроссовки, кеды, ботинки, куртки" aria-label="Поиск по каталогу" autocomplete="off">
     <div class="seg" id="groups">
-      <button type="button" data-group="all" aria-pressed="true">Обувь</button>
-      <button type="button" data-group="shoes" aria-pressed="false">Одежда</button>
-      <button type="button" data-group="clothes" aria-pressed="false">Аксессуары</button>
+      <button type="button" data-group="all" aria-pressed="true">Все</button>
+      <button type="button" data-group="shoes" aria-pressed="false">Обувь</button>
+      <button type="button" data-group="clothes" aria-pressed="false">Одежда</button>
+      <button type="button" data-group="accessories" aria-pressed="false">Аксессуары</button>
     </div>
     <div class="chips" id="types"></div>
   </header>
@@ -372,18 +399,21 @@ const EU = ['39', '40', '41', '42', '43', '44', '45'];
 const LET = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 
 /* ===== Каталог: меняйте товары здесь =====
-   ФОТО ТОВАРА: добавьте в объект товара поле img с путём к файлу или полной ссылкой, например:
-     { id: 1, type: 'sneakers', name: '...', img: 'photos/rs-814.jpg', ... }
-   Файлы лежат в папке photos рядом с этим index.html. Формат 4:5 (например 1200×1500), JPG или WebP, до 200 КБ.
-   Если поля img нет, показывается цветная плитка с силуэтом. */
+   ФОТО ТОВАРА: поле imgs — массив путей или полных ссылок (первое фото показывается первым), например:
+     { id: 1, type: 'sneakers', name: '...', imgs: ['photos/rs-814-1.jpg', 'photos/rs-814-2.jpg'], ... }
+   Одно фото тоже можно писать как img: 'photos/rs-814.jpg'.
+   Файлы лежат в папке photos рядом с этим index.html. Формат 4:5 (например 1200×1500), JPG или WebP, до 200 КБ каждое.
+   Размер на экране задаёт CSS: плитка в каталоге — .tile (aspect-ratio 4/5, ширина = колонка сетки),
+   карточка товара — .big.photo (aspect-ratio 4/5, ширина min(100%, 52vh)).
+   Если фото нет (или файл не загрузился), показывается цветная плитка с силуэтом. */
 const PRODUCTS = [
-  { id: 1,  type: 'sneakers', name: 'Кроссовки RS-814',       img: 'photos/rs-814-1.jpg',    brand: 'Roberson',    price: 14900, h: 214, isNew: true, sizes: EU,  sold: ['40', '44'], unit: 'EU', desc: 'Низкие кроссовки на каждый день. Верх из плотной кожи, подошва с хорошей амортизацией.' },
-  { id: 2,  type: 'sneakers', name: 'Кроссовки RS-725',       img: 'photos/rs-725-1.jpg',    brand: 'Nordlin',     price: 6490,  old: 8190, h: 152, sizes: EU,  sold: ['38', '45'], unit: 'EU', desc: 'Лёгкая сетка, которая дышит, и мягкая стелька. Подойдут для пробежек и прогулок.' },
-  { id: 3,  type: 'boots',    name: 'Ботинки «Чёрный лес»',                                  brand: 'Kamen',       price: 12900, h: 28,  sizes: ['39', '40', '41', '42', '43', '44', '45', '46'], sold: ['41'], unit: 'EU', desc: 'Кожаные ботинки на шнуровке с рифлёной подошвой. Держат форму и не промокают.' },
-  { id: 4,  type: 'boots',    name: 'Челси замшевые',                                        brand: 'Lovat',       price: 10500, old: 13200, h: 36,  sizes: ['39', '40', '41', '42', '43', '44'], sold: ['39', '43'], unit: 'EU', desc: 'Классические челси из натуральной замши с эластичными вставками по бокам.' },
-  { id: 6,  type: 'keds',     name: 'Кеды холщовые белые',                                   brand: 'Ostrov',      price: 3990,  h: 60,  sizes: EU,  sold: ['39', '41', '42'], unit: 'EU', desc: 'Лёгкие кеды из плотного холста на резиновой подошве.' },
-  { id: 13, type: 'jackets',  name: 'Куртка-бомбер',                                         brand: 'Ostrov',      price: 8900,  h: 130, sizes: LET, sold: ['XS', 'M'], unit: '', desc: 'Лёгкая демисезонная куртка на подкладке. Манжеты и пояс на резинке.' },
-  { id: 14, type: 'jackets',  name: 'Парка зимняя',                                          brand: 'Nordlin',     price: 15900, h: 100, isNew: true, sizes: ['S', 'M', 'L', 'XL', 'XXL'], sold: [], unit: '', desc: 'Утеплитель до −25 °C, съёмный мех на капюшоне, мембрана от ветра.' }
+  { id: 1,  type: 'sneakers', name: 'Кроссовки RS-814', imgs: ['photos/rs-814-1.jpg', 'photos/rs-814-2.jpg', 'photos/rs-814-3.jpg', 'photos/rs-814-3.jpg'], brand: 'Roberson', price: 14900, h: 214, isNew: true, sizes: EU,  sold: [], unit: 'EU', desc: 'Модель кроссовок, которые идеально сочетают в себе спортивный комфорт, элегантность и безупречное качество натуральных материалов..' },
+  { id: 2,  type: 'keds',     name: 'Кеды RS-725',      imgs: ['photos/rs-725-1.jpg', 'photos/rs-725-2.jpg', 'photos/rs-725-3.jpg', 'photos/rs-725-4.jpg'], brand: 'Roberson', price: 16900, h: 152, sizes: EU,  sold: [], unit: 'EU', desc: 'Лёгкая сетка, которая дышит, и мягкая стелька. Подойдут для пробежек и прогулок.' },
+  { id: 3,  type: 'boots',    name: 'Ботинки «Чёрный лес»',                                                                                                 brand: 'Roberson', price: 12900, h: 28,  sizes: ['36', '37', '38', '39', '40', '41'], sold: [], unit: 'EU', desc: 'Кожаные ботинки на шнуровке с рифлёной подошвой. Держат форму и не промокают.' },
+  { id: 4,  type: 'boots',    name: 'Челси замшевые',                                                                                                       brand: 'Roberson', price: 10500, h: 36,  sizes: ['39', '40', '41', '42', '43', '44'], sold: [], unit: 'EU', desc: 'Классические челси из натуральной замши с эластичными вставками по бокам.' },
+  { id: 6,  type: 'keds',     name: 'Кеды RS-724',      imgs: ['photos/rs-724-1.jpg', 'photos/rs-724-2.jpg', 'photos/rs-724-3.jpg', 'photos/rs-724-4.jpg'], brand: 'Roberson', price: 16900, h: 60,  sizes: ['36', '37', '38', '39', '40', '41'],  sold: [], unit: 'EU', desc: 'Стильные замшевые кеды с массивной белой подошвой — идеальный выбор для тех, кто ценит качество, современный дизайн и комфорт каждый день.' },
+  { id: 13, type: 'jackets',  name: 'Куртка-бомбер',                                                                                                        brand: 'Roberson', price: 8900,  h: 130, sizes: LET, sold: [], unit: '', desc: 'Лёгкая демисезонная куртка на подкладке. Манжеты и пояс на резинке.' },
+  { id: 14, type: 'jackets',  name: 'Парка зимняя',                                                                                                         brand: 'Roberson', price: 15900, h: 100, isNew: true, sizes: ['S', 'M', 'L', 'XL', 'XXL'], sold: [], unit: '', desc: 'Утеплитель до −25 °C, съёмный мех на капюшоне, мембрана от ветра.' }
 ];
 
 /* ===== Контуры товаров ===== */
@@ -399,11 +429,75 @@ const GLYPHS = {
   keyholders: '<rect x="10" y="14" width="44" height="36" rx="6"/><path d="M10 24h44M22 34v8M32 34v8M42 34v8"/>'
 };
 const glyph = t => '<svg class="glyph" viewBox="0 0 64 64" aria-hidden="true">' + (GLYPHS[t] || '') + '</svg>';
-/* Если у товара есть img, показываем фото, иначе цветную плитку с силуэтом */
-const pic = p => p.img ? '<img src="' + p.img + '" alt="' + p.name.replace(/"/g, '') + '" loading="lazy">' : glyph(p.type);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+/* Фото товара: imgs (массив) или img (одно). Нет фото — силуэт. */
+const photos = p => (p.imgs && p.imgs.length) ? p.imgs : (p.img ? [p.img] : []);
+function pic(p, full) {
+  const ph = photos(p);
+  if (!ph.length) return glyph(p.type);
+  const many = ph.length > 1;
+  const slides = ph.map((src, i) =>
+    '<span class="slide"><img src="' + esc(src) + '" alt="' + esc(p.name) + (many ? ', фото ' + (i + 1) + ' из ' + ph.length : '') + '" draggable="false"' + (i ? ' loading="lazy"' : '') + '></span>'
+  ).join('');
+  let html = '<span class="track">' + slides + '</span>';
+  if (many) {
+    html += '<span class="dots" aria-hidden="true">' + ph.map((_, i) => '<i' + (i ? '' : ' class="on"') + '></i>').join('') + '</span>';
+    const tag = full ? 'button type="button"' : 'span';
+    const end = full ? 'button' : 'span';
+    html += '<' + tag + ' class="nav prev" data-nav="-1" aria-label="Предыдущее фото">‹</' + end + '>' +
+            '<' + tag + ' class="nav next" data-nav="1" aria-label="Следующее фото">›</' + end + '>';
+  }
+  return html;
+}
+/* Если файл фото не загрузился — вместо него показываем силуэт, а не «битую» картинку */
+document.addEventListener('error', e => {
+  const im = e.target;
+  if (!im || im.tagName !== 'IMG' || !im.closest('.slide')) return;
+  const tile = im.closest('.tile');
+  const p = byId(Number((tile.closest('[data-id]') || $('sheet').querySelector('[data-id]') || {}).dataset?.id));
+  const slide = im.closest('.slide');
+  slide.innerHTML = p ? glyph(p.type) : '';
+  slide.style.display = 'grid'; slide.style.placeItems = 'center';
+  slide.style.color = getComputedStyle(tile).color;
+}, true);
+
+/* Листание: кнопки ‹ › и индикатор-точки */
+function slideTo(track, dir) {
+  const n = track.children.length, w = track.clientWidth;
+  if (n < 2 || !w) return;
+  const i = (Math.round(track.scrollLeft / w) + dir + n) % n;
+  track.scrollTo({ left: i * w, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+}
+document.addEventListener('scroll', e => {
+  const t = e.target;
+  if (!t || !t.classList || !t.classList.contains('track') || !t.clientWidth) return;
+  const i = Math.round(t.scrollLeft / t.clientWidth);
+  t.parentNode.querySelectorAll('.dots i').forEach((d, k) => d.classList.toggle('on', k === i));
+}, true);
+
+/* Автолистание фото в каталоге: только видимые плитки, пока пользователь их не трогал и лист закрыт */
+const seen = new Set();
+const io = 'IntersectionObserver' in window ? new IntersectionObserver(es => es.forEach(en => { en.isIntersecting ? seen.add(en.target) : seen.delete(en.target); }), { threshold: 0.6 }) : null;
+function watchTracks() {
+  seen.clear();
+  if (!io) return;
+  io.disconnect();
+  document.querySelectorAll('#grid .track').forEach(t => {
+    if (t.children.length < 2) return;
+    ['pointerdown', 'wheel', 'touchstart'].forEach(ev => t.addEventListener(ev, () => { t.dataset.hold = '1'; }, { passive: true, once: true }));
+    io.observe(t);
+  });
+}
+setInterval(() => {
+  if (document.hidden || !$('overlay').hidden || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  seen.forEach(t => { if (!t.dataset.hold) slideTo(t, 1); });
+}, 3500);
 
 /* ===== Telegram: если страница открыта как Web App ===== */
-const tg = window.Telegram && window.Telegram.WebApp;
+/* Скрипт telegram-web-app.js создаёт window.Telegram.WebApp и в обычном браузере, поэтому проверяем initData */
+const tgRaw = window.Telegram && window.Telegram.WebApp;
+const tg = tgRaw && tgRaw.initData ? tgRaw : null;
 if (tg) {
   try { tg.ready(); tg.expand(); document.documentElement.setAttribute('data-theme', tg.colorScheme === 'dark' ? 'dark' : 'light'); } catch (e) {}
 }
@@ -463,13 +557,14 @@ function renderGrid() {
   }
   $('grid').innerHTML = list.map(p => {
     const badge = p.old ? '<span class="badge sale">−' + pct(p) + '%</span>' : (p.isNew ? '<span class="badge">Новинка</span>' : '');
-    return '<button type="button" class="item" data-id="' + p.id + '">' +
-      '<span class="tile" style="--h:' + (p.h || 214) + '">' + pic(p) + badge + '</span>' +
-      '<span class="brandline">' + p.brand + ' · ' + TYPES[p.type].label + '</span>' +
-      '<span class="name">' + p.name + '</span>' +
+    return '<div class="item" role="button" tabindex="0" data-id="' + p.id + '" aria-label="' + esc(p.name) + '">' +
+      '<span class="tile" style="--h:' + (p.h || 214) + '">' + pic(p, false) + badge + '</span>' +
+      '<span class="brandline">' + esc(p.brand) + ' · ' + TYPES[p.type].label + '</span>' +
+      '<span class="name">' + esc(p.name) + '</span>' +
       '<span class="price"><b>' + fmt(p.price) + '</b>' + (p.old ? '<s>' + fmt(p.old) + '</s>' : '') + '</span>' +
-      '</button>';
+      '</div>';
   }).join('');
+  watchTracks();
 }
 
 function renderAll() { renderTypes(); renderGrid(); }
@@ -488,10 +583,12 @@ function renderBar() {
 
 /* ===== Листы ===== */
 let lastFocus = null;
-function openSheet() {
-  lastFocus = document.activeElement;
+function openSheet(soft) {
+  /* запоминаем фокус только при первом открытии, иначе перерисовка корзины затирает его удалённой кнопкой */
+  if ($('overlay').hidden) lastFocus = document.activeElement;
   $('overlay').hidden = false;
   document.body.classList.add('locked');
+  if (soft) return;
   const first = $('sheet').querySelector('.x');
   if (first) first.focus();
 }
@@ -522,10 +619,10 @@ function openProduct(id) {
   }).join('');
   const label = p.unit === 'EU' ? 'Размер (EU)' : p.unit === 'W' ? 'Обхват талии, W' : 'Размер';
   $('sheet').innerHTML =
-    '<div class="sheet-head"><h2 id="sheetTitle">' + p.name + '</h2><button type="button" class="x" data-act="close" aria-label="Закрыть">×</button></div>' +
-    '<div class="tile big' + (p.img ? ' photo' : '') + '" style="--h:' + (p.h || 214) + '">' + pic(p) + '</div>' +
-    '<div class="brandline" style="margin:0">' + p.brand + ' · ' + TYPES[p.type].label + '</div>' +
-    '<p class="desc">' + p.desc + '</p>' +
+    '<div class="sheet-head"><h2 id="sheetTitle">' + esc(p.name) + '</h2><button type="button" class="x" data-act="close" aria-label="Закрыть">×</button></div>' +
+    '<div class="tile big' + (photos(p).length ? ' photo' : '') + '" style="--h:' + (p.h || 214) + '">' + pic(p, true) + '</div>' +
+    '<div class="brandline" style="margin:0">' + esc(p.brand) + ' · ' + TYPES[p.type].label + '</div>' +
+    '<p class="desc">' + esc(p.desc) + '</p>' +
     '<div><p class="label">' + label + '</p><div class="sizes" id="sizes">' + sizes + '</div></div>' +
     '<div class="buyrow"><div class="price"><b style="font-size:24px">' + fmt(p.price) + '</b>' + (p.old ? '<s>' + fmt(p.old) + '</s>' : '') + '</div>' +
     '<button type="button" class="btn grow" id="add" data-act="add" data-id="' + p.id + '" disabled>Выберите размер</button></div>';
@@ -548,11 +645,11 @@ function orderText() {
 function managerUrl() {
   return 'https://t.me/' + SHOP.manager + '?text=' + encodeURIComponent(orderText());
 }
-function openCart() {
+function openCart(soft) {
   if (!cart.length) { closeSheet(); return; }
   const rows = cart.map((l, i) => {
     const p = byId(l.id);
-    return '<div class="line"><span class="t">' + p.name + '</span><span class="lp">' + fmt(p.price * l.qty) + '</span>' +
+    return '<div class="line"><span class="t">' + esc(p.name) + '</span><span class="lp">' + fmt(p.price * l.qty) + '</span>' +
       '<span class="m">' + sizeText(p, l.size) + ' · ' + fmt(p.price) + '</span>' +
       '<span class="step"><button type="button" data-act="dec" data-i="' + i + '" aria-label="Меньше">−</button><span>' + l.qty + '</span><button type="button" data-act="inc" data-i="' + i + '" aria-label="Больше">+</button></span></div>';
   }).join('');
@@ -569,15 +666,20 @@ function openCart() {
     '<button type="button" class="clear" data-act="clear">Очистить корзину</button>';
   $('note').value = comment;
   $('order').textContent = orderText();
-  openSheet();
+  openSheet(soft);
 }
 function refreshCart() {
   saveCart();
   renderBar();
   if (!cart.length) { closeSheet(); return; }
-  const keepFocusNote = document.activeElement && document.activeElement.id === 'note';
-  openCart();
+  const ae = document.activeElement;
+  const keepFocusNote = ae && ae.id === 'note';
+  const btn = ae && ae.dataset && ae.dataset.act && ae.dataset.i !== undefined ? '[data-act="' + ae.dataset.act + '"][data-i="' + ae.dataset.i + '"]' : null;
+  const st = $('sheet').scrollTop;
+  openCart(true);              /* перерисовка без прыжка фокуса и прокрутки */
+  $('sheet').scrollTop = st;
   if (keepFocusNote) $('note').focus();
+  else if (btn) { const b = $('sheet').querySelector(btn); if (b) b.focus(); }
 }
 
 async function copyOrder() {
@@ -620,12 +722,25 @@ $('grid').addEventListener('click', e => {
     renderAll();
     return;
   }
+  const nav = e.target.closest('[data-nav]');
+  if (nav) { slideTo(nav.closest('.tile').querySelector('.track'), Number(nav.dataset.nav)); nav.closest('.tile').querySelector('.track').dataset.hold = '1'; return; }
   const it = e.target.closest('[data-id]');
   if (it) openProduct(Number(it.dataset.id));
 });
-$('openCart').addEventListener('click', openCart);
+$('grid').addEventListener('keydown', e => {
+  const it = e.target.closest('.item');
+  if (it && e.target === it && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openProduct(Number(it.dataset.id)); }
+});
+$('openCart').addEventListener('click', () => openCart());
 $('scrim').addEventListener('click', closeSheet);
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('overlay').hidden) closeSheet(); });
+document.addEventListener('keydown', e => {
+  if ($('overlay').hidden) return;
+  if (e.key === 'Escape') closeSheet();
+  if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !/INPUT|TEXTAREA/.test(e.target.tagName)) {
+    const tr = $('sheet').querySelector('.track');
+    if (tr) slideTo(tr, e.key === 'ArrowRight' ? 1 : -1);
+  }
+});
 
 $('sheet').addEventListener('input', e => {
   if (e.target.id === 'note') {
@@ -636,6 +751,8 @@ $('sheet').addEventListener('input', e => {
   }
 });
 $('sheet').addEventListener('click', e => {
+  const nav = e.target.closest('[data-nav]');
+  if (nav) { slideTo($('sheet').querySelector('.track'), Number(nav.dataset.nav)); return; }
   const sz = e.target.closest('.size');
   if (sz && !sz.disabled) {
     sel = sz.dataset.size;
