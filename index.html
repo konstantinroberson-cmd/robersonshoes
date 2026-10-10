@@ -300,7 +300,7 @@ button { cursor: pointer; }
       <h1 class="logo" id="shopName">Roberson | Ателье кожи</h1>
       <div class="asof" id="asOf"></div>
     </div>
-    <input class="search" id="q" type="search" placeholder="Поиск: худи, ботинки, джинсы" aria-label="Поиск по каталогу" autocomplete="off">
+    <input class="search" id="q" type="search" placeholder="Поиск: кроссовки, кеды, ботинки" aria-label="Поиск по каталогу" autocomplete="off">
     <div class="seg" id="groups">
       <button type="button" data-group="all" aria-pressed="true">Всё</button>
       <button type="button" data-group="shoes" aria-pressed="false">Обувь</button>
@@ -352,28 +352,28 @@ try {
 /* ===== Настройки магазина ===== */
 const SHOP = {
   name: 'Roberson | Ателье кожи',
-  manager: '',          // username менеджера в Telegram без @, например 'shagishov_manager'
-  asOf: '09.10.2026'    // дата, на которую актуальны цены
+  manager: 'roberson_atelier',          // username менеджера в Telegram без @, например 'shagishov_manager'
+  asOf: '10.10.2026'    // дата, на которую актуальны цены
 };
 
 /* ===== Каталог: меняйте товары здесь ===== */
 const TYPES = {
-  sneakers: { label: 'Кроссовки', group: 'shoes' },
-  boots:    { label: 'Ботинки',   group: 'shoes' },
-  loafers:  { label: 'Лоферы',    group: 'shoes' },
-  tees:     { label: 'Футболки',  group: 'clothes' },
-  hoodies:  { label: 'Худи',      group: 'clothes' },
-  jeans:    { label: 'Джинсы',    group: 'clothes' },
-  jackets:  { label: 'Куртки',    group: 'clothes' },
-  dresses:  { label: 'Платья',    group: 'clothes' }
+  sneakers:    { label: 'Кроссовки', group: 'shoes' },
+  sneakers:    { label: 'Кеды',      group: 'shoes' },
+  boots:       { label: 'Ботинки',   group: 'shoes' },
+  jackets:     { label: 'Куртки',    group: 'clothes' },
+  coat:        { label: 'Пальто',    group: 'clothes' },
+  belts:       { label: 'Ремни',     group: 'accessories' },
+  keychains:   { label: 'Брелки',    group: 'accessories' },
+  keyholders:  { label: 'Ключницы',  group: 'accessories' }
 };
-const EU = ['38', '39', '40', '41', '42', '43', '44', '45'];
+const EU = ['39', '40', '41', '42', '43', '44', '45'];
 const EU_F = ['36', '37', '38', '39', '40', '41'];
 const LET = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 const WAIST = ['28', '30', '32', '34', '36'];
 
 const PRODUCTS = [
-  { id: 1,  type: 'sneakers', name: 'Кроссовки «Тропа»',        brand: 'Ostrov',  price: 7990,  h: 214, isNew: true, sizes: EU,  sold: ['40', '44'], unit: 'EU', desc: 'Низкие кроссовки на каждый день. Верх из плотной кожи, подошва с хорошей амортизацией.' },
+  { id: 1,  type: 'sneakers', name: 'Кроссовки RS-814',         brand: 'Roberson',  price: 14900,  h: 214, isNew: true, sizes: EU,  sold: ['40', '44'], unit: 'EU', desc: 'Низкие кроссовки на каждый день. Верх из плотной кожи, подошва с хорошей амортизацией.' },
   { id: 2,  type: 'sneakers', name: 'Кроссовки «Бегун»',        brand: 'Nordlin', price: 6490,  old: 8190, h: 152, sizes: EU,  sold: ['38', '45'], unit: 'EU', desc: 'Лёгкая сетка, которая дышит, и мягкая стелька. Подойдут для пробежек и прогулок.' },
   { id: 3,  type: 'boots',    name: 'Ботинки «Чёрный лес»',     brand: 'Kamen',   price: 12900, h: 28,  sizes: ['39', '40', '41', '42', '43', '44', '45', '46'], sold: ['41'], unit: 'EU', desc: 'Кожаные ботинки на шнуровке с рифлёной подошвой. Держат форму и не промокают.' },
   { id: 4,  type: 'boots',    name: 'Челси замшевые',           brand: 'Lovat',   price: 10500, old: 13200, h: 36,  sizes: ['39', '40', '41', '42', '43', '44'], sold: ['39', '43'], unit: 'EU', desc: 'Классические челси из натуральной замши с эластичными вставками по бокам.' },
