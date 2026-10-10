@@ -300,11 +300,12 @@ button { cursor: pointer; }
       <h1 class="logo" id="shopName">Roberson | Ателье кожи</h1>
       <div class="asof" id="asOf"></div>
     </div>
-    <input class="search" id="q" type="search" placeholder="Поиск: кроссовки, кеды, ботинки" aria-label="Поиск по каталогу" autocomplete="off">
+    <input class="search" id="q" type="search" placeholder="Поиск: кроссовки, кеды, ботинки, куртки" aria-label="Поиск по каталогу" autocomplete="off">
     <div class="seg" id="groups">
       <button type="button" data-group="all" aria-pressed="true">Всё</button>
       <button type="button" data-group="shoes" aria-pressed="false">Обувь</button>
       <button type="button" data-group="clothes" aria-pressed="false">Одежда</button>
+      <button type="button" data-group="accessories" aria-pressed="false">Аксессуары</button>
     </div>
     <div class="chips" id="types"></div>
   </header>
@@ -352,14 +353,15 @@ try {
 /* ===== Настройки магазина ===== */
 const SHOP = {
   name: 'Roberson | Ателье кожи',
-  manager: 'roberson_atelier',          // username менеджера в Telegram без @, например 'shagishov_manager'
+  manager: 'roberson_atelier',          // username менеджера в Telegram без @
   asOf: '10.10.2026'    // дата, на которую актуальны цены
 };
 
-/* ===== Каталог: меняйте товары здесь ===== */
+/* ===== Категории ===== */
+/* Ключ (sneakers, keds...) — это значение поля type у товара. Ключи не должны повторяться. */
 const TYPES = {
   sneakers:    { label: 'Кроссовки', group: 'shoes' },
-  sneakers:    { label: 'Кеды',      group: 'shoes' },
+  keds:        { label: 'Кеды',      group: 'shoes' },
   boots:       { label: 'Ботинки',   group: 'shoes' },
   jackets:     { label: 'Куртки',    group: 'clothes' },
   coat:        { label: 'Пальто',    group: 'clothes' },
@@ -368,69 +370,67 @@ const TYPES = {
   keyholders:  { label: 'Ключницы',  group: 'accessories' }
 };
 const EU = ['39', '40', '41', '42', '43', '44', '45'];
-const EU_F = ['36', '37', '38', '39', '40', '41'];
 const LET = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
-const WAIST = ['28', '30', '32', '34', '36'];
 
+/* ===== Каталог: меняйте товары здесь =====
+   ФОТО ТОВАРА: добавьте в объект товара поле img с путём к файлу или полной ссылкой, например:
+     { id: 1, type: 'sneakers', name: '...', img: 'photos/rs-814.jpg', ... }
+   Файлы лежат в папке photos рядом с этим index.html. Формат 4:5 (например 1200×1500), JPG или WebP, до 200 КБ.
+   Если поля img нет, показывается цветная плитка с силуэтом. */
 const PRODUCTS = [
-  { id: 1,  type: 'sneakers', name: 'Кроссовки RS-814',         brand: 'Roberson',  price: 14900,  h: 214, isNew: true, sizes: EU,  sold: ['40', '44'], unit: 'EU', desc: 'Низкие кроссовки на каждый день. Верх из плотной кожи, подошва с хорошей амортизацией.' },
-  { id: 2,  type: 'sneakers', name: 'Кроссовки «Бегун»',        brand: 'Nordlin', price: 6490,  old: 8190, h: 152, sizes: EU,  sold: ['38', '45'], unit: 'EU', desc: 'Лёгкая сетка, которая дышит, и мягкая стелька. Подойдут для пробежек и прогулок.' },
-  { id: 3,  type: 'boots',    name: 'Ботинки «Чёрный лес»',     brand: 'Kamen',   price: 12900, h: 28,  sizes: ['39', '40', '41', '42', '43', '44', '45', '46'], sold: ['41'], unit: 'EU', desc: 'Кожаные ботинки на шнуровке с рифлёной подошвой. Держат форму и не промокают.' },
-  { id: 4,  type: 'boots',    name: 'Челси замшевые',           brand: 'Lovat',   price: 10500, old: 13200, h: 36,  sizes: ['39', '40', '41', '42', '43', '44'], sold: ['39', '43'], unit: 'EU', desc: 'Классические челси из натуральной замши с эластичными вставками по бокам.' },
-  { id: 5,  type: 'loafers',  name: 'Лоферы «Пассаж»',          brand: 'Lovat',   price: 9200,  h: 350, sizes: EU_F, sold: [], unit: 'EU', desc: 'Лоферы из гладкой кожи на низком каблуке. Подходят и к джинсам, и к платью.' },
-  { id: 6,  type: 'sneakers', name: 'Кеды холщовые белые',      brand: 'Ostrov',  price: 3990,  h: 60,  sizes: EU,  sold: ['39', '41', '42'], unit: 'EU', desc: 'Лёгкие кеды из плотного холста на резиновой подошве.' },
-  { id: 7,  type: 'tees',     name: 'Футболка из плотного хлопка', brand: 'Vetka', price: 1890, h: 200, sizes: LET, sold: ['XXL'], unit: '', desc: 'Хлопок 220 г/м², прямой крой. Не вытягивается после стирки.' },
-  { id: 8,  type: 'tees',     name: 'Футболка оверсайз с принтом', brand: 'Vetka', price: 2290, h: 322, isNew: true, sizes: LET, sold: ['XS'], unit: '', desc: 'Свободный крой, спущенное плечо, принт нанесён водной краской.' },
-  { id: 9,  type: 'hoodies',  name: 'Худи «Сумерки»',           brand: 'Nordlin', price: 5490,  h: 262, sizes: LET, sold: ['S'], unit: '', desc: 'Тёплый флис внутри, капюшон со шнурком, карман-кенгуру.' },
-  { id: 10, type: 'hoodies',  name: 'Худи на молнии',           brand: 'Nordlin', price: 5990,  old: 7490, h: 172, sizes: LET, sold: ['XS', 'XXL'], unit: '', desc: 'Застёжка на металлическую молнию, манжеты на резинке.' },
-  { id: 11, type: 'jeans',    name: 'Джинсы прямые',            brand: 'Kamen',   price: 5290,  h: 218, sizes: WAIST, sold: ['34'], unit: 'W', desc: 'Прямой крой, средняя посадка. Деним 12 унций.' },
-  { id: 12, type: 'jeans',    name: 'Джинсы зауженные тёмные',  brand: 'Kamen',   price: 4790,  old: 5990, h: 232, sizes: WAIST, sold: ['28', '36'], unit: 'W', desc: 'Тёмно-синий деним с небольшим добавлением эластана.' },
-  { id: 13, type: 'jackets',  name: 'Куртка-бомбер',            brand: 'Ostrov',  price: 8900,  h: 130, sizes: LET, sold: ['XS', 'M'], unit: '', desc: 'Лёгкая демисезонная куртка на подкладке. Манжеты и пояс на резинке.' },
-  { id: 14, type: 'jackets',  name: 'Парка зимняя',             brand: 'Nordlin', price: 15900, h: 100, isNew: true, sizes: ['S', 'M', 'L', 'XL', 'XXL'], sold: [], unit: '', desc: 'Утеплитель до −25 °C, съёмный мех на капюшоне, мембрана от ветра.' },
-  { id: 15, type: 'dresses',  name: 'Платье миди льняное',      brand: 'Vetka',   price: 6200,  h: 22,  sizes: ['XS', 'S', 'M', 'L', 'XL'], sold: ['L'], unit: '', desc: 'Лён с добавлением хлопка, свободная юбка до середины икры.' },
-  { id: 16, type: 'dresses',  name: 'Платье-рубашка',           brand: 'Lovat',   price: 4900,  old: 6100, h: 188, sizes: ['XS', 'S', 'M', 'L'], sold: ['XS'], unit: '', desc: 'Застёжка на пуговицы, пояс в комплекте, рукав три четверти.' }
+  { id: 1,  type: 'sneakers', name: 'Кроссовки RS-814',         brand: 'Roberson', price: 14900, h: 214, isNew: true, sizes: EU,  sold: ['40', '44'], unit: 'EU', desc: 'Низкие кроссовки на каждый день. Верх из плотной кожи, подошва с хорошей амортизацией.' },
+  { id: 2,  type: 'sneakers', name: 'Кроссовки «Бегун»',        brand: 'Nordlin',  price: 6490,  old: 8190, h: 152, sizes: EU,  sold: ['38', '45'], unit: 'EU', desc: 'Лёгкая сетка, которая дышит, и мягкая стелька. Подойдут для пробежек и прогулок.' },
+  { id: 3,  type: 'boots',    name: 'Ботинки «Чёрный лес»',     brand: 'Kamen',    price: 12900, h: 28,  sizes: ['39', '40', '41', '42', '43', '44', '45', '46'], sold: ['41'], unit: 'EU', desc: 'Кожаные ботинки на шнуровке с рифлёной подошвой. Держат форму и не промокают.' },
+  { id: 4,  type: 'boots',    name: 'Челси замшевые',           brand: 'Lovat',    price: 10500, old: 13200, h: 36,  sizes: ['39', '40', '41', '42', '43', '44'], sold: ['39', '43'], unit: 'EU', desc: 'Классические челси из натуральной замши с эластичными вставками по бокам.' },
+  { id: 6,  type: 'keds',     name: 'Кеды холщовые белые',      brand: 'Ostrov',   price: 3990,  h: 60,  sizes: EU,  sold: ['39', '41', '42'], unit: 'EU', desc: 'Лёгкие кеды из плотного холста на резиновой подошве.' },
+  { id: 13, type: 'jackets',  name: 'Куртка-бомбер',            brand: 'Ostrov',   price: 8900,  h: 130, sizes: LET, sold: ['XS', 'M'], unit: '', desc: 'Лёгкая демисезонная куртка на подкладке. Манжеты и пояс на резинке.' },
+  { id: 14, type: 'jackets',  name: 'Парка зимняя',             brand: 'Nordlin',  price: 15900, h: 100, isNew: true, sizes: ['S', 'M', 'L', 'XL', 'XXL'], sold: [], unit: '', desc: 'Утеплитель до −25 °C, съёмный мех на капюшоне, мембрана от ветра.' }
 ];
 
 /* ===== Контуры товаров ===== */
+const SNEAKER = '<path d="M6 42V33q0-2 2-2h8l6-9q2-2 5 0l3 4q4 4 10 5l12 3q6 2 6 8v2z"/><path d="M6 46h52M26 25l3 3M30 28l3 3"/>';
 const GLYPHS = {
-  sneakers: '<path d="M6 42V33q0-2 2-2h8l6-9q2-2 5 0l3 4q4 4 10 5l12 3q6 2 6 8v2z"/><path d="M6 46h52M26 25l3 3M30 28l3 3"/>',
-  boots:    '<path d="M18 8h16v22q0 4 6 6l14 4q4 2 4 6v4H18z"/><path d="M18 54h40M18 15h16"/>',
-  loafers:  '<path d="M6 44v-8q10-4 20-2 10 4 20 4 12 0 12 8v2H6z"/><path d="M6 48h52M20 34v4h8"/>',
-  tees:     '<path d="M22 10 10 18l6 10 6-4v30h20V24l6 4 6-10-12-8q-10 8-20 0z"/>',
-  hoodies:  '<path d="M24 8q8 8 16 0l12 6 6 26-10 2-2-16v30H18V26l-2 16-10-2 6-26z"/><path d="M24 8q8 16 16 0M24 42h16"/>',
-  jeans:    '<path d="M18 8h28l4 48H35l-3-30-3 30H14z"/><path d="M18 14h28"/>',
-  jackets:  '<path d="M22 8h20l14 8-2 34h-9v6H19v-6h-9L8 16z"/><path d="M32 8v48M22 8l10 10 10-10"/>',
-  dresses:  '<path d="M26 8h12l2 18 12 30H12l12-30z"/><path d="M24 26h16"/>'
+  sneakers:   SNEAKER,
+  keds:       SNEAKER,
+  boots:      '<path d="M18 8h16v22q0 4 6 6l14 4q4 2 4 6v4H18z"/><path d="M18 54h40M18 15h16"/>',
+  jackets:    '<path d="M22 8h20l14 8-2 34h-9v6H19v-6h-9L8 16z"/><path d="M32 8v48M22 8l10 10 10-10"/>',
+  coat:       '<path d="M22 8h20l14 10-4 38H38V28l-6 6-6-6v28H14L10 18z"/><path d="M32 34v22M22 8l10 12 10-12"/>',
+  belts:      '<rect x="6" y="26" width="52" height="12" rx="3"/><rect x="38" y="24" width="10" height="16" rx="2"/><path d="M14 32h4M22 32h4M30 32h4"/>',
+  keychains:  '<circle cx="32" cy="14" r="7"/><path d="M32 21v10"/><rect x="22" y="31" width="20" height="22" rx="5"/>',
+  keyholders: '<rect x="10" y="14" width="44" height="36" rx="6"/><path d="M10 24h44M22 34v8M32 34v8M42 34v8"/>'
 };
 const glyph = t => '<svg class="glyph" viewBox="0 0 64 64" aria-hidden="true">' + (GLYPHS[t] || '') + '</svg>';
 /* Если у товара есть img, показываем фото, иначе цветную плитку с силуэтом */
 const pic = p => p.img ? '<img src="' + p.img + '" alt="' + p.name.replace(/"/g, '') + '" loading="lazy">' : glyph(p.type);
 
 /* ===== Telegram: если страница открыта как Web App ===== */
-/* На своём хостинге добавьте перед этим скриптом:
-   тег script с атрибутом src="https://telegram.org/js/telegram-web-app.js" */
 const tg = window.Telegram && window.Telegram.WebApp;
 if (tg) {
   try { tg.ready(); tg.expand(); document.documentElement.setAttribute('data-theme', tg.colorScheme === 'dark' ? 'dark' : 'light'); } catch (e) {}
 }
 
 /* ===== Состояние ===== */
-const CART_KEY = 'shagishov-cart';
+const CART_KEY = 'roberson-cart';
 const state = { group: 'all', type: 'all', q: '', sort: 'pop' };
 let cart = [];
 try { cart = JSON.parse(localStorage.getItem(CART_KEY) || '[]').filter(l => PRODUCTS.some(p => p.id === l.id)); } catch (e) { cart = []; }
 const saveCart = () => { try { localStorage.setItem(CART_KEY, JSON.stringify(cart)); } catch (e) {} };
 
 const $ = id => document.getElementById(id);
-const fmt = n => new Intl.NumberFormat('ru-RU').format(n) + ' ₽';
+const fmt = n => new Intl.NumberFormat('ru-RU').format(n) + ' ₽';
 const byId = id => PRODUCTS.find(p => p.id === id);
-const sizeText = (p, s) => (p.unit && p.unit !== '' ? p.unit + ' ' : '') + s;
+const sizeText = (p, s) => (p.unit && p.unit !== '' ? p.unit + ' ' : '') + s;
 const pct = p => Math.round((1 - p.price / p.old) * 100);
 const plural = (n, a, b, c) => { const m = n % 100, d = n % 10; if (m > 10 && m < 15) return c; if (d === 1) return a; if (d > 1 && d < 5) return b; return c; };
 
 $('shopName').textContent = SHOP.name;
 $('asOf').textContent = 'цены на ' + SHOP.asOf;
 document.title = SHOP.name;
+
+/* кнопки групп без товаров скрываем */
+document.querySelectorAll('#groups [data-group]').forEach(b => {
+  if (b.dataset.group !== 'all') b.hidden = !PRODUCTS.some(p => TYPES[p.type].group === b.dataset.group);
+});
 
 /* ===== Каталог ===== */
 function visible() {
@@ -448,7 +448,8 @@ function visible() {
 }
 
 function renderTypes() {
-  const keys = Object.keys(TYPES).filter(k => state.group === 'all' || TYPES[k].group === state.group);
+  /* показываем только категории, в которых есть товары */
+  const keys = Object.keys(TYPES).filter(k => (state.group === 'all' || TYPES[k].group === state.group) && PRODUCTS.some(p => p.type === k));
   $('types').innerHTML =
     '<button type="button" class="chip" data-type="all" aria-pressed="' + (state.type === 'all') + '">Все</button>' +
     keys.map(k => '<button type="button" class="chip" data-type="' + k + '" aria-pressed="' + (state.type === k) + '">' + TYPES[k].label + '</button>').join('');
@@ -542,7 +543,8 @@ function orderText() {
   });
   let t = 'Заказ из «' + SHOP.name + '»\n' + lines.join('\n') + '\nИтого: ' + fmt(cartTotal());
   if (comment.trim()) t += '\nКомментарий: ' + comment.trim();
-  return t.replace(/ /g, ' ');
+  /* Intl вставляет неразрывные пробелы, в тексте заказа заменяем их на обычные */
+  return t.replace(/[\u00a0\u202f]/g, ' ');
 }
 function managerUrl() {
   return 'https://t.me/' + SHOP.manager + '?text=' + encodeURIComponent(orderText());
