@@ -74,6 +74,7 @@ body {
   padding-inline: 16px;
   padding-block: 0 96px;
 }
+html, body { overscroll-behavior-y: none; }
 body.locked { overflow: hidden; }
 button, input, select, textarea { font: inherit; color: inherit; }
 button { cursor: pointer; }
@@ -209,6 +210,7 @@ button { cursor: pointer; }
   max-width: 860px;
   max-height: 92%;
   overflow-y: auto;
+  overscroll-behavior: contain;
   background: var(--surface);
   border-radius: 20px 20px 0 0;
   padding: 18px 16px calc(18px + env(safe-area-inset-bottom, 0px));
@@ -254,6 +256,10 @@ button { cursor: pointer; }
 .big .nav { display: grid; }
 @media (hover: hover) { .item:hover .nav { display: grid; } }
 .big .glyph { width: 28%; min-width: 80px; }
+.specs { margin: 0; display: grid; gap: 6px; }
+.specs div { display: flex; justify-content: space-between; gap: 12px; padding-block: 8px; border-bottom: 1px solid var(--line); }
+.specs dt { color: var(--muted); }
+.specs dd { margin: 0; font-weight: 500; text-align: right; }
 .desc { margin: 0; font-size: 16px; color: var(--muted); max-width: 65ch; }
 .label { font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin: 0 0 8px; }
 .sizes { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -395,30 +401,47 @@ const TYPES = {
   keychains:   { label: 'Брелки',    group: 'accessories' },
   keyholders:  { label: 'Ключницы',  group: 'accessories' }
 };
+const GENDER = { m: 'Мужской', f: 'Женский', mf: 'Мужской/Женский' };   /* поле gender у товара: 'm' или 'f' */
 const EU = ['36', '37', '38', '39', '40', '41', '42', '43', '44', '45'];
 const LET = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 
 /* ===== Каталог: меняйте товары здесь =====
    ФОТО ТОВАРА: поле imgs — массив путей или полных ссылок (первое фото показывается первым), например:
-     { id: 1, type: 'sneakers', name: '...', imgs: ['photos/rs-814-1.jpg', 'photos/rs-814-2.jpg'], ... }
+     { id: 1, type: 'sneakers', color: '', gender: 'm', name: '...', imgs: ['photos/rs-814-1.jpg', 'photos/rs-814-2.jpg'], ... }
    Одно фото тоже можно писать как img: 'photos/rs-814.jpg'.
    Файлы лежат в папке photos рядом с этим index.html. Формат 4:5 (например 1200×1500), JPG или WebP, до 200 КБ каждое.
    Размер на экране задаёт CSS: плитка в каталоге — .tile (aspect-ratio 4/5, ширина = колонка сетки),
    карточка товара — .big.photo (aspect-ratio 4/5, ширина min(100%, 52vh)).
    Если фото нет (или файл не загрузился), показывается цветная плитка с силуэтом. */
 const PRODUCTS = [
-  { id: 1,  type: 'sneakers', name: 'Кроссовки RS-814', imgs: ['photos/rs-814-1.jpg', 'photos/rs-814-2.jpg', 'photos/rs-814-3.jpg', 'photos/rs-814-4.jpg'], brand: 'Roberson', price: 14900, h: 214, isNew: true, sizes: ['40', '41', '42', '43', '44', '45'],  sold: [], unit: 'EU', desc: 'Модель кроссовок, которые идеально сочетают в себе спортивный комфорт, элегантность и безупречное качество натуральных материалов..' },
-  { id: 2,  type: 'keds',     name: 'Кеды RS-725',      imgs: ['photos/rs-725-1.jpg', 'photos/rs-725-2.jpg', 'photos/rs-725-3.jpg', 'photos/rs-725-4.jpg'], brand: 'Roberson', price: 16900, h: 152, sizes: EU,  sold: [], unit: 'EU', desc: 'Кеды с массивной белой подошвой и фактурной кожи — современный дизайн и комфорт каждый день' },
-  { id: 3,  type: 'sneakers', name: 'Кроссовки RS-699', imgs: ['photos/rs-699-1.jpg', 'photos/rs-699-2.jpg', 'photos/rs-699-3.jpg', 'photos/rs-699-4.jpg'], brand: 'Roberson', price: 14900, h: 28,  sizes: ['36', '37', '38', '39', '40', '41'], sold: [], unit: 'EU', desc: 'Модель сочетает актуальный силуэт, натуральные материалы и комфорт, поэтому легко вписывается как в повседневный, так и в более собранный городской образ.' },
-  { id: 4,  type: 'sneakers', name: 'Кроссовки RS-545', imgs: ['photos/rs-545-1.jpg', 'photos/rs-545-2.jpg', 'photos/rs-545-3.jpg', 'photos/rs-545-4.jpg'], brand: 'Roberson', price: 14900, h: 36,  sizes: ['36', '37', '38', '39', '40', '41'], sold: [], unit: 'EU', desc: 'Современные кроссовки из белоснежной фактурной кожи и выразительной массивной подошвой -  — выразительный элемент дизайна и практичное решение для повседневной носки.' },
-  { id: 6,  type: 'keds',     name: 'Кеды RS-724',      imgs: ['photos/rs-724-1.jpg', 'photos/rs-724-2.jpg', 'photos/rs-724-3.jpg', 'photos/rs-724-4.jpg'], brand: 'Roberson', price: 16900, h: 60,  sizes: EU,  sold: [], unit: 'EU', desc: 'Стильные замшевые кеды выполнены в благородно графитово-сером оттенке. Мягкая поверхность, аккуратная шнуровка и выразительная белая подошва создают стильный образ, который легко сочетать с повседневной и спортивной одеждой.' },
-  { id: 7,  type: 'keds',     name: 'Кеды RS-003',      imgs: ['photos/rs-003-1.jpg', 'photos/rs-003-2.jpg', 'photos/rs-003-3.jpg', 'photos/rs-003-4.jpg'], brand: 'Roberson', price: 21900,  h: 130, sizes: ['40', '41', '42', '43', '44', '45'], sold: [], unit: '', desc: 'Высокий силуэт добавляет образу характера, а натуральная замша делает кеды универсальными для ежедневной носки.' },
-  { id: 8,  type: 'keds',     name: 'Кеды RS-303',      imgs: ['photos/rs-303-1.jpg', 'photos/rs-303-2.jpg', 'photos/rs-303-3.jpg', 'photos/rs-303-4.jpg'], brand: 'Roberson', price: 12900, h: 100, isNew: true, sizes: EU, sold: [], unit: '', desc: 'Обувь, которая сочетает эстетику ретро-кед, современный streetwear и практичность комбинации кожи и замши.' },
-  { id: 9,  type: 'keds',     name: 'Кеды RS-962',      imgs: ['photos/rs-962-1.jpg', 'photos/rs-962-2.jpg', 'photos/rs-962-3.jpg', 'photos/rs-962-4.jpg'], brand: 'Roberson', price: 24900, h: 100, isNew: true, sizes: EU, sold: [], unit: '', desc: 'Высокие кожаные кеды в классической черной-белой расцветке.' },
-  { id: 10, type: 'keds',     name: 'Кеды RS-303',      imgs: ['photos/rs-303-1.jpg', 'photos/rs-303-2.jpg', 'photos/rs-303-3.jpg', 'photos/rs-303-4.jpg'], brand: 'Roberson', price: 12900, h: 100, isNew: true, sizes: EU, sold: [], unit: '', desc: 'Обувь, которая сочетает эстетику ретро-кед, современный streetwear и практичность комбинации кожи и замши.' },
-  { id: 11, type: 'keds',     name: 'Кеды RS-303',      imgs: ['photos/rs-303-1.jpg', 'photos/rs-303-2.jpg', 'photos/rs-303-3.jpg', 'photos/rs-303-4.jpg'], brand: 'Roberson', price: 12900, h: 100, isNew: true, sizes: EU, sold: [], unit: '', desc: 'Обувь, которая сочетает эстетику ретро-кед, современный streetwear и практичность комбинации кожи и замши.' },
-  { id: 12, type: 'keds',     name: 'Кеды RS-303',      imgs: ['photos/rs-303-1.jpg', 'photos/rs-303-2.jpg', 'photos/rs-303-3.jpg', 'photos/rs-303-4.jpg'], brand: 'Roberson', price: 12900, h: 100, isNew: true, sizes: EU, sold: [], unit: '', desc: 'Обувь, которая сочетает эстетику ретро-кед, современный streetwear и практичность комбинации кожи и замши.' },
-  { id: 13, type: 'keds',     name: 'Кеды RS-303',      imgs: ['photos/rs-303-1.jpg', 'photos/rs-303-2.jpg', 'photos/rs-303-3.jpg', 'photos/rs-303-4.jpg'], brand: 'Roberson', price: 12900, h: 100, isNew: true, sizes: EU, sold: [], unit: '', desc: 'Обувь, которая сочетает эстетику ретро-кед, современный streetwear и практичность комбинации кожи и замши.' }
+  { id: 1,  type: 'sneakers', color: 'Винный',           gender: 'm',     name: 'Кроссовки RS-814', imgs: ['photos/rs-814-1.jpg', 'photos/rs-814-2.jpg', 'photos/rs-814-3.jpg', 'photos/rs-814-4.jpg'],                brand: 'Roberson', price: 14900, h: 214, isNew: true, sizes: ['40', '41', '42', '43', '44', '45'],  sold: [], unit: 'EU', desc: 'Модель кроссовок, которые идеально сочетают в себе спортивный комфорт, элегантность и безупречное качество натуральных материалов..' },
+  { id: 2,  type: 'keds',     color: 'Чёрный',           gender: 'mf',    name: 'Кеды RS-725',      imgs: ['photos/rs-725-1.jpg', 'photos/rs-725-2.jpg', 'photos/rs-725-3.jpg', 'photos/rs-725-4.jpg'],                brand: 'Roberson', price: 16900, h: 152, sizes: EU,  sold: [], unit: 'EU', desc: 'Кеды с массивной белой подошвой и фактурной кожи — современный дизайн и комфорт каждый день' },
+  { id: 3,  type: 'sneakers', color: 'Чёрный',           gender: 'f',     name: 'Кроссовки RS-699', imgs: ['photos/rs-699-1.jpg', 'photos/rs-699-2.jpg', 'photos/rs-699-3.jpg', 'photos/rs-699-4.jpg'],                brand: 'Roberson', price: 14900, h: 28,  sizes: ['36', '37', '38', '39', '40', '41'], sold: [], unit: 'EU', desc: 'Модель сочетает актуальный силуэт, натуральные материалы и комфорт, поэтому легко вписывается как в повседневный, так и в более собранный городской образ.' },
+  { id: 4,  type: 'sneakers', color: 'Белый',            gender: 'f',     name: 'Кроссовки RS-545', imgs: ['photos/rs-545-1.jpg', 'photos/rs-545-2.jpg', 'photos/rs-545-3.jpg', 'photos/rs-545-4.jpg'],                brand: 'Roberson', price: 14900, h: 36,  sizes: ['36', '37', '38', '39', '40', '41'], sold: [], unit: 'EU', desc: 'Современные кроссовки из белоснежной фактурной кожи и выразительной массивной подошвой -  — выразительный элемент дизайна и практичное решение для повседневной носки.' },
+  { id: 6,  type: 'keds',     color: 'Графитовый',       gender: 'mf',    name: 'Кеды RS-724',      imgs: ['photos/rs-724-1.jpg', 'photos/rs-724-2.jpg', 'photos/rs-724-3.jpg', 'photos/rs-724-4.jpg'],                brand: 'Roberson', price: 16900, h: 60,  sizes: EU,  sold: [], unit: 'EU', desc: 'Стильные замшевые кеды выполнены в благородно графитово-сером оттенке. Мягкая поверхность, аккуратная шнуровка и выразительная белая подошва создают стильный образ, который легко сочетать с повседневной и спортивной одеждой.' },
+  { id: 7,  type: 'keds',     color: 'Болотный',         gender: 'mf',    name: 'Кеды RS-003',      imgs: ['photos/rs-003-1.jpg', 'photos/rs-003-2.jpg', 'photos/rs-003-3.jpg', 'photos/rs-003-4.jpg'],                brand: 'Roberson', price: 21900, h: 130, sizes: ['40', '41', '42', '43', '44', '45'], sold: [], unit: '', desc: 'Высокий силуэт добавляет образу характера, а натуральная замша делает кеды универсальными для ежедневной носки.' },
+  { id: 8,  type: 'keds',     color: 'Бежевый',          gender: 'mf',    name: 'Кеды RS-303',      imgs: ['photos/rs-303-1.jpg', 'photos/rs-303-2.jpg', 'photos/rs-303-3.jpg', 'photos/rs-303-4.jpg'],                brand: 'Roberson', price: 12900, h: 100, isNew: true, sizes: EU, sold: [], unit: '', desc: 'Обувь, которая сочетает эстетику ретро-кед, современный streetwear и практичность комбинации кожи и замши.' },
+  { id: 9,  type: 'keds',     color: 'Черный/белый',     gender: 'mf',    name: 'Кеды RS-962',      imgs: ['photos/rs-962-1.jpg', 'photos/rs-962-2.jpg', 'photos/rs-962-3.jpg', 'photos/rs-962-4.jpg'],                brand: 'Roberson', price: 24900, h: 100, isNew: true, sizes: EU, sold: [], unit: '', desc: 'Высокие кожаные кеды в классической черной-белой расцветке.' },
+  { id: 10, type: 'sneakers', color: 'Ченый/коричневый', gender: 'm',     name: 'Кроссовки RS-716', imgs: ['photos/rs-716-1.jpg', 'photos/rs-716-2.jpg', 'photos/rs-716-3.jpg', 'photos/rs-716-4.jpg'],                brand: 'Roberson', price: 14900, h: 100, isNew: true, sizes: ['40', '41', '42', '43', '44', '45'], sold: [], unit: '', desc: 'Современные мужские кроссовки из натуральной кожи подходят для насыщенного городского дня.' },
+  { id: 11, type: 'sneakers', color: 'Черный/коричневый',gender: 'm',     name: 'Кроссовки RS-456', imgs: ['photos/rs-456-1.jpg', 'photos/rs-456-2.jpg', 'photos/rs-456-3.jpg', 'photos/rs-456-4.jpg'],                brand: 'Roberson', price: 14900, h: 100, isNew: true, sizes: ['40', '41', '42', '43', '44', '45'], sold: [], unit: '', desc: '' },
+  { id: 12, type: 'sneakers', color: 'Черный',           gender: 'm',     name: 'Кроссовки RS-814', imgs: ['photos/rs-8141-1.jpg', 'photos/rs-8141-2.jpg', 'photos/rs-8141-3.jpg', 'photos/rs-8141-4.jpg'],            brand: 'Roberson', price: 14900, h: 100, isNew: true, sizes: ['40', '41', '42', '43', '44', '45'], sold: [], unit: '', desc: '' },
+  { id: 13, type: 'sneakers', color: 'Черный',           gender: 'm',     name: 'Кроссовки RS-814', imgs: ['photos/rs-8141C-1.jpg', 'photos/rs-8141C-2.jpg', 'photos/rs-8141C-3.jpg', 'photos/rs-8141C-4.jpg'],        brand: 'Roberson', price: 14900, h: 100, isNew: true, sizes: ['40', '41', '42', '43', '44', '45'], sold: [], unit: '', desc: '' },
+  { id: 14, type: 'sneakers', color: 'Коричневый',       gender: 'm',     name: 'Кроссовки RS-814', imgs: ['photos/rs-8142-1.jpg', 'photos/rs-8142-2.jpg', 'photos/rs-8142-3.jpg', 'photos/rs-8142-4.jpg'],            brand: 'Roberson', price: 14900, h: 100, isNew: true, sizes: ['40', '41', '42', '43', '44', '45'], sold: [], unit: '', desc: '' },
+  { id: 15, type: 'sneakers', color: 'Тёмно-синий',      gender: 'm',     name: 'Кроссовки RS-814B',imgs: ['photos/rs-824-1.jpg', 'photos/rs-824-2.jpg', 'photos/rs-824-3.jpg', 'photos/rs-824-4.jpg'],                brand: 'Roberson', price: 15900, h: 100, isNew: true, sizes: ['40', '41', '42', '43', '44', '45'], sold: [], unit: '', desc: '' },
+  { id: 16, type: 'keds',     color: 'Винный',           gender: 'mf',    name: 'Кеды RS-962',      imgs: ['photos/rs-962vin-1.jpg', 'photos/rs-962vin-2.jpg', 'photos/rs-962vin-3.jpg', 'photos/rs-962vin-4.jpg'],    brand: 'Roberson', price: 24900, h: 100, isNew: true, sizes: EU, sold: [], unit: '', desc: '' },
+  { id: 17, type: 'keds',     color: 'Белый/синий',      gender: 'mf',    name: 'Кеды RS-M1',       imgs: ['photos/rs-m1-1.jpg', 'photos/rs-m1-2.jpg', 'photos/rs-m1-3.jpg', 'photos/rs-m1-4.jpg'],                    brand: 'Roberson', price: 12900, h: 100, isNew: true, sizes: EU, sold: [], unit: '', desc: '' },
+  { id: 18, type: 'sneakers', color: 'Черный',           gender: 'm',     name: 'Кроссовки RS-998', imgs: ['photos/rs-998-1.jpg', 'photos/rs-998-2.jpg', 'photos/rs-998-3.jpg', 'photos/rs-998-4.jpg'],                brand: 'Roberson', price: 16900, h: 100, isNew: true, sizes: ['40', '41', '42', '43', '44', '45'], sold: [], unit: '', desc: 'Обувь, которая сочетает эстетику ретро-кед, современный streetwear и практичность комбинации кожи и замши.' },
+  { id: 19, type: 'keds',     color: '',                 gender: 'm',     name: 'Кеды RS-303',      imgs: ['photos/rs-303-1.jpg', 'photos/rs-303-2.jpg', 'photos/rs-303-3.jpg', 'photos/rs-303-4.jpg'],                brand: 'Roberson', price: 12900, h: 100, isNew: true, sizes: EU, sold: [], unit: '', desc: 'Обувь, которая сочетает эстетику ретро-кед, современный streetwear и практичность комбинации кожи и замши.' },
+  { id: 20, type: 'keds',     color: '',                 gender: 'm',     name: 'Кеды RS-303',      imgs: ['photos/rs-303-1.jpg', 'photos/rs-303-2.jpg', 'photos/rs-303-3.jpg', 'photos/rs-303-4.jpg'],                brand: 'Roberson', price: 12900, h: 100, isNew: true, sizes: EU, sold: [], unit: '', desc: 'Обувь, которая сочетает эстетику ретро-кед, современный streetwear и практичность комбинации кожи и замши.' },
+  { id: 21, type: 'keds',     color: '',                 gender: 'm',     name: 'Кеды RS-303',      imgs: ['photos/rs-303-1.jpg', 'photos/rs-303-2.jpg', 'photos/rs-303-3.jpg', 'photos/rs-303-4.jpg'],                brand: 'Roberson', price: 12900, h: 100, isNew: true, sizes: EU, sold: [], unit: '', desc: 'Обувь, которая сочетает эстетику ретро-кед, современный streetwear и практичность комбинации кожи и замши.' },
+  { id: 22, type: 'keds',     color: '',                 gender: 'm',     name: 'Кеды RS-303',      imgs: ['photos/rs-303-1.jpg', 'photos/rs-303-2.jpg', 'photos/rs-303-3.jpg', 'photos/rs-303-4.jpg'],                brand: 'Roberson', price: 12900, h: 100, isNew: true, sizes: EU, sold: [], unit: '', desc: 'Обувь, которая сочетает эстетику ретро-кед, современный streetwear и практичность комбинации кожи и замши.' },
+  { id: 23, type: 'keds',     color: '',                 gender: 'm',     name: 'Кеды RS-303',      imgs: ['photos/rs-303-1.jpg', 'photos/rs-303-2.jpg', 'photos/rs-303-3.jpg', 'photos/rs-303-4.jpg'],                brand: 'Roberson', price: 12900, h: 100, isNew: true, sizes: EU, sold: [], unit: '', desc: 'Обувь, которая сочетает эстетику ретро-кед, современный streetwear и практичность комбинации кожи и замши.' },
+  { id: 24, type: 'keds',     color: '',                 gender: 'm',     name: 'Кеды RS-303',      imgs: ['photos/rs-303-1.jpg', 'photos/rs-303-2.jpg', 'photos/rs-303-3.jpg', 'photos/rs-303-4.jpg'],                brand: 'Roberson', price: 12900, h: 100, isNew: true, sizes: EU, sold: [], unit: '', desc: 'Обувь, которая сочетает эстетику ретро-кед, современный streetwear и практичность комбинации кожи и замши.' }
+
+
+
+
+
 
 ];
 
@@ -506,6 +529,9 @@ const tgRaw = window.Telegram && window.Telegram.WebApp;
 const tg = tgRaw && tgRaw.initData ? tgRaw : null;
 if (tg) {
   try { tg.ready(); tg.expand(); document.documentElement.setAttribute('data-theme', tg.colorScheme === 'dark' ? 'dark' : 'light'); } catch (e) {}
+  /* свайп вниз у верха страницы больше не сворачивает приложение (Bot API 7.7+) */
+  try { if (tg.disableVerticalSwipes) tg.disableVerticalSwipes(); } catch (e) {}
+  try { if (tg.setHeaderColor) tg.setHeaderColor('bg_color'); if (tg.setBackgroundColor) tg.setBackgroundColor('bg_color'); } catch (e) {}
 }
 
 /* ===== Состояние ===== */
@@ -538,7 +564,7 @@ function visible() {
     if (state.group !== 'all' && TYPES[p.type].group !== state.group) return false;
     if (state.type !== 'all' && p.type !== state.type) return false;
     if (state.sort === 'sale' && !p.old) return false;
-    if (q && !(p.name + ' ' + p.brand + ' ' + TYPES[p.type].label).toLowerCase().includes(q)) return false;
+    if (q && !(p.name + ' ' + p.brand + ' ' + TYPES[p.type].label + ' ' + (p.color || '') + ' ' + (GENDER[p.gender] || '')).toLowerCase().includes(q)) return false;
     return true;
   });
   if (state.sort === 'asc') list = list.slice().sort((a, b) => a.price - b.price);
@@ -629,6 +655,7 @@ function openProduct(id) {
     '<div class="tile big' + (photos(p).length ? ' photo' : '') + '" style="--h:' + (p.h || 214) + '">' + pic(p, true) + '</div>' +
     '<div class="brandline" style="margin:0">' + esc(p.brand) + ' · ' + TYPES[p.type].label + '</div>' +
     '<p class="desc">' + esc(p.desc) + '</p>' +
+    '<dl class="specs">' + (p.color ? '<div><dt>Цвет</dt><dd>' + esc(p.color) + '</dd></div>' : '') + (GENDER[p.gender] ? '<div><dt>Пол</dt><dd>' + GENDER[p.gender] + '</dd></div>' : '') + '</dl>' +
     '<div><p class="label">' + label + '</p><div class="sizes" id="sizes">' + sizes + '</div></div>' +
     '<div class="buyrow"><div class="price"><b style="font-size:24px">' + fmt(p.price) + '</b>' + (p.old ? '<s>' + fmt(p.old) + '</s>' : '') + '</div>' +
     '<button type="button" class="btn grow" id="add" data-act="add" data-id="' + p.id + '" disabled>Выберите размер</button></div>';
