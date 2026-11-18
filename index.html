@@ -371,15 +371,15 @@ button { cursor: pointer; }
      Ссылки и фотография настраиваются в блоке WELCOME ниже в JavaScript. -->
 <section class="welcome" id="welcome" aria-label="Приветствие">
   <div class="welcome-card">
-    <p class="welcome-kicker">Roberson · Ателье кожи</p>
-    <img class="welcome-photo" id="welcomePhoto" src="photos/rs-814-1.jpg" alt="Коллекция Roberson">
-    <h2 class="welcome-title">Добро пожаловать в Roberson</h2>
+    <p class="welcome-kicker">ROBERSON · Ателье кожи</p>
+    <img class="welcome-photo" id="welcomePhoto" src="photos/rs-welcome.jpg" alt="Коллекция Roberson">
+    <h2 class="welcome-title">Добро пожаловать в Ателье кожи</h2>
     <p class="welcome-text">Обувь и аксессуары из натуральной кожи. Выберите нужный раздел или перейдите в каталог.</p>
     <nav class="welcome-menu" aria-label="Основное меню">
       <a class="welcome-link" id="welcomeLink1" href="#catalog">Каталог</a>
-      <a class="welcome-link" id="welcomeLink2" href="https://t.me/roberson_atelier" target="_blank" rel="noopener">Связаться с нами</a>
-      <a class="welcome-link" id="welcomeLink3" href="#delivery">Доставка и оплата</a>
-      <a class="welcome-link" id="welcomeLink4" href="#about">О бренде</a>
+      <a class="welcome-link" id="welcomeLink2" href="https://t.me/roberson_atelier" target="_blank" rel="noopener">Напишите нам</a>
+      <a class="welcome-link" id="welcomeLink3" href="#delivery">WhatsApp</a>
+      <a class="welcome-link" id="welcomeLink4" href="#about">Instagram</a>
     </nav>
     <button class="welcome-start" id="welcomeStart" type="button">Старт</button>
   </div>
@@ -443,9 +443,9 @@ window.addEventListener('error', function (e) {
 try {
 /* ===== Настройки магазина ===== */
 const SHOP = {
-  name: 'Roberson | Ателье кожи',
+  name: 'ROBERSON | Ателье кожи',
   manager: 'roberson_atelier',          // username менеджера в Telegram без @
-  asOf: 'октябрь 2026'    // дата, на которую актуальны цены
+  asOf: 'ноябрь 2026'    // дата, на которую актуальны цены
 };
 
 /* ===== Категории ===== */
@@ -610,8 +610,8 @@ const WELCOME = {
   photo: 'photos/rs-welcome.jpg',
   links: [
     { id: 'welcomeLink1', text: 'Каталог', url: '#catalog' },
-    { id: 'welcomeLink2', text: 'Связаться с нами', url: 'https://t.me/roberson_atelier' },
-    { id: 'welcomeLink3', text: 'WhatsApp', url: 'https://t.me/roberson_atelier' },
+    { id: 'welcomeLink2', text: 'Напишите нам', url: 'https://t.me/roberson_atelier' },
+    { id: 'welcomeLink3', text: 'WhatsApp', url: 'https://wa.me/79613313343' },
     { id: 'welcomeLink4', text: 'Instagram', url: 'https://www.instagram.com/roberson_atelier' }
   ]
 };
