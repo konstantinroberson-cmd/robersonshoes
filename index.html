@@ -322,70 +322,11 @@ button { cursor: pointer; }
   font-size: 15px;
   pointer-events: none;
 }
-
-/* ===== Приветственное окно ===== */
-.welcome {
-  position: fixed; inset: 0; z-index: 30;
-  display: flex; align-items: stretch; justify-content: center;
-  padding: max(18px, env(safe-area-inset-top, 0px)) 16px max(18px, env(safe-area-inset-bottom, 0px));
-  background: var(--bg); overflow-y: auto;
-}
-.welcome[hidden] { display: none !important; }
-.welcome-card {
-  width: 100%; max-width: 560px; min-height: min(820px, 100%);
-  margin: auto; display: flex; flex-direction: column; gap: 16px;
-}
-.welcome-photo {
-  width: 100%; aspect-ratio: 16 / 10; object-fit: cover;
-  border-radius: 18px; background: var(--line);
-}
-.welcome-kicker {
-  margin: 0; color: var(--accent); font: 500 12px var(--f-mono);
-  text-transform: uppercase; letter-spacing: .12em;
-}
-.welcome-title {
-  margin: 0; font: 600 clamp(25px, 7vw, 36px)/1.15 var(--f-display);
-  letter-spacing: -.03em;
-}
-.welcome-text { margin: 0; color: var(--muted); font-size: 16px; }
-.welcome-menu { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
-.welcome-link {
-  display: flex; align-items: center; justify-content: center; min-height: 52px;
-  padding: 12px; border: 1px solid var(--line); border-radius: 12px;
-  background: var(--surface); color: var(--ink); text-decoration: none;
-  text-align: center; font-weight: 600;
-}
-.welcome-link:active { transform: scale(.98); }
-.welcome-start {
-  width: 100%; margin-top: auto; border: 0; border-radius: 12px;
-  padding: 17px 20px; background: var(--accent); color: var(--on-accent);
-  font-size: 17px; font-weight: 600;
-}
-
 </style>
 </head>
 <body>
 
-
-<!-- Приветствие показывается при каждом новом открытии страницы.
-     Ссылки и фотография настраиваются в блоке WELCOME ниже в JavaScript. -->
-<section class="welcome" id="welcome" aria-label="Приветствие">
-  <div class="welcome-card">
-    <p class="welcome-kicker">ROBERSON · Ателье кожи</p>
-    <img class="welcome-photo" id="welcomePhoto" src="photos/rs-welcome.jpg" alt="Коллекция Roberson">
-    <h2 class="welcome-title">Добро пожаловать в Ателье кожи</h2>
-    <p class="welcome-text">Обувь и аксессуары из натуральной кожи. Выберите нужный раздел или перейдите в каталог.</p>
-    <nav class="welcome-menu" aria-label="Основное меню">
-      <a class="welcome-link" id="welcomeLink1" href="#catalog">Каталог</a>
-      <a class="welcome-link" id="welcomeLink2" href="https://t.me/roberson_atelier" target="_blank" rel="noopener">Напишите нам</a>
-      <a class="welcome-link" id="welcomeLink3" href="#delivery">WhatsApp</a>
-      <a class="welcome-link" id="welcomeLink4" href="#about">Instagram</a>
-    </nav>
-    <button class="welcome-start" id="welcomeStart" type="button">Старт</button>
-  </div>
-</section>
-
-<div class="wrap" id="catalog">
+<div class="wrap">
   <header class="top">
     <div class="brand">
       <h1 class="logo" id="shopName">Roberson | Ателье кожи</h1>
@@ -443,9 +384,9 @@ window.addEventListener('error', function (e) {
 try {
 /* ===== Настройки магазина ===== */
 const SHOP = {
-  name: 'ROBERSON | Ателье кожи',
+  name: 'Roberson | Ателье кожи',
   manager: 'roberson_atelier',          // username менеджера в Telegram без @
-  asOf: 'ноябрь 2026'    // дата, на которую актуальны цены
+  asOf: 'октябрь 2026'    // дата, на которую актуальны цены
 };
 
 /* ===== Категории ===== */
@@ -601,29 +542,6 @@ try { cart = JSON.parse(localStorage.getItem(CART_KEY) || '[]').filter(l => PROD
 const saveCart = () => { try { localStorage.setItem(CART_KEY, JSON.stringify(cart)); } catch (e) {} };
 
 const $ = id => document.getElementById(id);
-
-/* ===== Приветственное окно: настройте 4 ссылки и фото здесь =====
-   Фото: положите файл в папку photos рядом с index.html и укажите путь.
-   Ссылки можно заменить на адреса сайта, Telegram, Instagram и т. п.
-   Для перехода к разделу на этой странице используйте #catalog. */
-const WELCOME = {
-  photo: 'photos/rs-welcome.jpg',
-  links: [
-    { id: 'welcomeLink1', text: 'Каталог', url: '#catalog' },
-    { id: 'welcomeLink2', text: 'Напишите нам', url: 'https://t.me/roberson_atelier' },
-    { id: 'welcomeLink3', text: 'WhatsApp', url: 'https://wa.me/79613313343' },
-    { id: 'welcomeLink4', text: 'Instagram', url: 'https://www.instagram.com/roberson_atelier' }
-  ]
-};
-$('welcomePhoto').src = WELCOME.photo;
-WELCOME.links.forEach(item => {
-  const link = $(item.id);
-  if (link) { link.textContent = item.text; link.href = item.url; }
-});
-$('welcomeStart').addEventListener('click', () => {
-  $('welcome').hidden = true;
-  window.scrollTo({ top: 0, behavior: 'auto' });
-});
 const fmt = n => new Intl.NumberFormat('ru-RU').format(n) + ' ₽';
 const byId = id => PRODUCTS.find(p => p.id === id);
 const sizeText = (p, s) => (p.unit && p.unit !== '' ? p.unit + ' ' : '') + s;
